@@ -22,9 +22,10 @@ optimizer = torch.optim.SGD([params], lr = learning_rate)
 
 def training_loop(n_epochs, optimizer, params, t_u, t_c):
     for epoch in range(1, n_epochs + 1):
-        optimizer.zero_grad()
-        t_p = model(w1, w2, t_u, b)
+        
+        t_p = model(params[0], params[1], t_u, params[2])
         loss = loss_fn(t_p, t_c)
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         
@@ -34,4 +35,5 @@ def training_loop(n_epochs, optimizer, params, t_u, t_c):
     return params
 
 params = training_loop(n_epochs = 5000, optimizer=optimizer, params = params, t_u= t_un, t_c= t_c)
+
 
