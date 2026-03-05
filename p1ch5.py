@@ -16,61 +16,22 @@ def loss_fn(t_p, t_c):
 w1 = torch.ones(())
 w2 = torch.ones(())
 b = torch.zeros(())
+params = torch.tensor([1.0, 1.0, 0.0], requires_grad=True)
+learning_rate = 1e-2
+optimizer = torch.optim.SGD([params], lr = learning_rate)
 
-t_p = model(w1, w2, t_un, b)
-loss = loss_fn(t_p, t_c)
-
-print(loss,'\n', t_p)
-
-def dloss_fn(t_p, t_c):
-    dsq_diffs = 2 * (t_p - t_c)
-    return dsq_diffs
-
-def dmodel_dw1(w1, w2, t_u, b):
-    return (t_u**2)
-
-def dmodel_dw2(w1, w2, t_u, b):
-    return 1.0
-
-def dmodel_db(w1, w2, t_u, b):
-    return 1.0
-
-
-
-
-def grad_fn(w1, w2, t_u, t_c, t_p, b):
-    dloss_dtp = dloss_fn(t_p, t_c)
-    dloss_dw1 = dmodel_dw1(w1, w2, t_u, b) * dloss_dtp
-    dloss_dw2 = dmodel_dw2(w1, w2, t_u, b) * dloss_dtp
-    dloss_db = dmodel_db(w1, w2, t_u, b) * dloss_dtp
-    return torch.stack ([sum(dloss_dw1), sum(dloss_dw2), sum(dloss_db)])
-
-
-
-
-def training_loop(n_epochs, learning_rate, params, t_u, t_c):
+def training_loop(n_epochs, optimizer, params, t_u, t_c):
     for epoch in range(1, n_epochs + 1):
-        w1, w2, b = params
+        optimizer.zero_grad()
         t_p = model(w1, w2, t_u, b)
         loss = loss_fn(t_p, t_c)
-        grad = grad_fn(w1, w2, t_u, t_c, t_p, b)
+        loss.backward()
+        optimizer.step()
+        
 
-        params = params - learning_rate * grad
-
-        print('Epoch %d, Loss%f' % (epoch, float(loss)),'\n', params)
+        if epoch%500==0:
+            print('Epoch %d, Loss%f' % (epoch, float(loss)),'\n', params)
     return params
 
-params = training_loop(n_epochs = 500, learning_rate = 1e-2, params = torch.tensor([1.0, 1.0, 0.0]), t_u= t_un, t_c= t_c)
+params = training_loop(n_epochs = 5000, optimizer=optimizer, params = params, t_u= t_un, t_c= t_c)
 
-
-
-from matplotlib import pyplot as plt
-
-'''fig = plt.figure(dpi=600)
-plt.xlabel("Temperature(Farenheit)")
-plt.ylabel("Temperature(Celsius)")
-plt.plot(t_un.numpy(), t_p.detach().numpy())
-plt.plot(t_un.numpy(), t_c.numpy(),'o')
-plt.show()'''
-
-print(params.grad is None)
