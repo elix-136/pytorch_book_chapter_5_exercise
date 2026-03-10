@@ -29,5 +29,3 @@ training_loop(n_epohs=5000,
               t_u=t_un, 
               t_c= t_c)
 
-
-
